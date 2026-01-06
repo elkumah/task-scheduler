@@ -4,8 +4,9 @@
 set -o nounset
 set -o errexit
 
-# Define the action variable
+# Define  required  variable
 ACTION="${1:-}"
+
 
 # How to use the script
 usage() {
@@ -24,18 +25,42 @@ if [[ -z "$ACTION"  ]]; then
 
 fi
 
-# Handle multiple actions and validate arguments
+# Handle  actions and validate arguments, schedule type, schedule time
 case "$ACTION" in
 	add)
 		if [[ "$#" -lt 4 ]]; then
 			echo "Error: Add requires 4 arguments "
+			echo "Example:$0 add daily 14:30 /path/to/command"
 			usage
 		fi
 
-		echo "Shedule type:'$2', Schedule details: '$3'"
+		schedule_type="$2"
+		schedule_time="$3"
 
-		;;
+		# validate schedule type
+		case "$schedule_type" in 
+			hourly)
+				if [[ ! "$schedule_time" =~ ^([0-5]?[0-9])$ ]]; then
+					echo "Error: For hourly specify the miniutes(HH:MM) "
+					exit 1
+			         fi
+				;;
 
+			daily|weekly)
+				 if [[ ! "$schedule_time" =~ ^([01][0-9]|2[0-3]):[0-5][0-9]$ ]]; then
+					 echo "Error: Invalid time format: '$schedule_time'. Use HH:MM (24-hour)"
+				          exit 1
+				 fi
+				 ;;
+                        *)
+
+			echo "Error: Invalid schedule type:'$schedule_type'. Valid schedule type should be Hourly, Daily, Weekly "
+			exit 1
+
+				;;
+		esac
+		
+	    ;;
 
 	list)
 		if [[ "$#" -ne 1 ]]; then
