@@ -1,0 +1,23 @@
+# Inside .gitignore file:
+# System files
+.DS_Store
+*.swp
+*.swo
+
+# Logs and temp files
+*.log
+tmp/
+temp/
+sh_logout
+.bashr
+.cache/
+.gitconfig
+.profile
+.ssh/
+ .viminfo
+# Environment files with secrets
+.env
+.secrets
+
+# OS-specific files
+Thumbs.db
