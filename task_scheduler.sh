@@ -36,17 +36,12 @@ case "$ACTION" in
 
 		schedule_type="$2"
 		schedule_time="$3"
+		command="${@:4}"
 
 		# validate schedule type
 		case "$schedule_type" in 
-			hourly)
-				if [[ ! "$schedule_time" =~ ^([0-5]?[0-9])$ ]]; then
-					echo "Error: For hourly specify the miniutes(HH:MM) "
-					exit 1
-			         fi
-				;;
 
-			daily|weekly)
+			hourly|daily|weekly)
 				 if [[ ! "$schedule_time" =~ ^([01][0-9]|2[0-3]):[0-5][0-9]$ ]]; then
 					 echo "Error: Invalid time format: '$schedule_time'. Use HH:MM (24-hour)"
 				          exit 1
@@ -57,11 +52,34 @@ case "$ACTION" in
 			echo "Error: Invalid schedule type:'$schedule_type'. Valid schedule type should be Hourly, Daily, Weekly "
 			exit 1
 
-				;;
+			
 		esac
+			echo "Schedule type: $schedule_type"
+			echo "Schedule time: $schedule_time"
+			echo "Command: $command"
 		
-	    ;;
+	    
 
+	    # Write task record to file
+	    # Specify the location of the file and directory name 
+	    TASK_FILE="$HOME/.task_scheduler/tasks.db"
+
+	    TASK_DIR="$(dirname "$TASK_FILE")"
+
+	    mkdir -p "$TASK_DIR"
+
+	    #generate task id using date
+	    task_id="$(date +%s)"
+
+	    status="enabled"
+	# Create the task record
+
+	    task_record="${task_id}|${status}|${schedule_type}|${schedule_time}|${command}"
+
+	    echo "$task_record" >> "$TASK_FILE"
+
+	    echo "Task added successfully. ID: ${task_id}"
+		;;
 	list)
 		if [[ "$#" -ne 1 ]]; then
 			echo "Error: list takes no argument"
