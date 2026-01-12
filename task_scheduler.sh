@@ -7,6 +7,9 @@ set -o errexit
 # Define  required  variable
 ACTION="${1:-}"
 
+TASK_FILE="$HOME/.task_scheduler/tasks.db"
+TASK_DIR="$(dirname "$TASK_FILE")"
+	    
 
 # How to use the script
 usage() {
@@ -62,9 +65,6 @@ case "$ACTION" in
 
 	    # Write task record to file
 	    # Specify the location of the file and directory name 
-	    TASK_FILE="$HOME/.task_scheduler/tasks.db"
-
-	    TASK_DIR="$(dirname "$TASK_FILE")"
 
 	    mkdir -p "$TASK_DIR"
 
@@ -85,7 +85,23 @@ case "$ACTION" in
 			echo "Error: list takes no argument"
 			usage
 		fi
+                # Check if file does not  exist
+		if [[ ! -f "$TASK_FILE" ]]; then
+			echo "File not found"
+			exit 1
 
+		fi
+
+		#Loop each line in the file
+		while IFS='|' read -r task_id status schedule_type schedule_time command; do
+			echo "Task Id: $task_id"
+			echo "status:$status"
+			echo "schedule type: $schedule_type"
+			echo "Schedule time: $schedule_time"
+			echo "Command: $command"
+			echo "------------------------"
+			 
+		done < "$TASK_FILE"
 		;;
 
 
