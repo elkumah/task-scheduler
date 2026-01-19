@@ -86,13 +86,13 @@ case "$ACTION" in
 			usage
 		fi
                 # Check if file does not  exist
-		if [[ ! -f "$TASK_FILE" ]]; then
-			echo "File not found"
-			exit 1
+		if [[ ! -f "$TASK_FILE" || ! -s "$TASK_FILE" ]]; then
+			echo "No tasks found"
+			exit 0
 
 		fi
 
-		#Loop each line in the file
+		#Go through each  line in the file and print the task details
 		while IFS='|' read -r task_id status schedule_type schedule_time command; do
 			echo "Task Id: $task_id"
 			echo "status:$status"
@@ -110,6 +110,8 @@ case "$ACTION" in
 			echo "Error: Remove takes 2 arguments"
 			usage
 		fi
+		task_id="$2"
+		echo "id: $task_id"
 
 		;;
 	*)
