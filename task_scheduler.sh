@@ -9,6 +9,8 @@ ACTION="${1:-}"
 
 TASK_FILE="$HOME/.task_scheduler/tasks.db"
 TASK_DIR="$(dirname "$TASK_FILE")"
+TEMP_FILE=$(mktemp)
+remove_task_id="${2:-}"
 	    
 
 # How to use the script
@@ -110,8 +112,24 @@ case "$ACTION" in
 			echo "Error: Remove takes 2 arguments"
 			usage
 		fi
-		task_id="$2"
-		echo "id: $task_id"
+	        # Check if file exist 
+		if [[ ! -f "$TASK_FILE" || ! -s "$TASK_FILE" ]]; then
+			echo "No task found"
+			exit 0
+		fi
+		
+		
+		# Read file line by line and write line to temp file when task ids dont match
+	        while IFS= read -r  line; do
+			task_id=$(echo "$line" | awk -F "|" '{print $1}')
+
+		        if [[ $task_id -ne $remove_task_id ]]; then
+			  # Write the line to the temp file 
+			      
+				echo "$line" >> "$TEMP_FILE"
+			fi
+		done < "$TASK_FILE"	
+		echo "Temp file created at: $TEMP_FILE"
 
 		;;
 	*)
