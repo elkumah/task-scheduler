@@ -6,12 +6,13 @@ set -o errexit
 
 # Define  required  variable
 ACTION="${1:-}"
-
+new_status="$ACTION"
 TASK_FILE="$HOME/.task_scheduler/tasks.db"
 TASK_DIR="$(dirname "$TASK_FILE")"
 TEMP_FILE=$(mktemp)
 task_id_to_remove="${2:-}"
 task_found=false
+task_id_to_target="${2:-}"
 	    
 
 # How to use the script
@@ -147,6 +148,24 @@ case "$ACTION" in
 	         echo "Task id '$task_id_to_remove' removed successfully"	
 
 		;;
+	enable|disable)
+		
+		
+
+		if [[  -z "$task_id_to_target" ]]; then
+			echo "No task id to target"
+			exit 1
+		fi
+
+		#check if file does not exit or size is not greater than zero
+		if [[ ! -f "$TASK_FILE" || ! -s "$TASK_FILE" ]]; then
+			echo "Error: File does not exit"
+			exit 0
+		fi
+
+		echo "The new status '$new_status' and id: '$task_id_to_target' "
+		;;
+	
 	*)
 		echo "Unknown action: '$ACTION' "
 		
