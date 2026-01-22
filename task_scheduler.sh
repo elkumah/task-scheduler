@@ -10,7 +10,8 @@ ACTION="${1:-}"
 TASK_FILE="$HOME/.task_scheduler/tasks.db"
 TASK_DIR="$(dirname "$TASK_FILE")"
 TEMP_FILE=$(mktemp)
-remove_task_id="${2:-}"
+task_id_to_remove="${2:-}"
+task_found=false
 	    
 
 # How to use the script
@@ -123,13 +124,27 @@ case "$ACTION" in
 	        while IFS= read -r  line; do
 			task_id=$(echo "$line" | awk -F "|" '{print $1}')
 
-		        if [[ $task_id -ne $remove_task_id ]]; then
-			  # Write the line to the temp file 
+		        if [[ "$task_id" == "$task_id_to_remove" ]]; then
+			  # set task found to true 
+			  task_found=true
+			  continue  # skip this task
 			      
-				echo "$line" >> "$TEMP_FILE"
+			
 			fi
+		   #Copy all the other tasks into temp file
+		   echo "$line" >> "$TEMP_FILE"
 		done < "$TASK_FILE"	
-		echo "Temp file created at: $TEMP_FILE"
+		
+		if [[ "$task_found" == false ]]; then
+			rm -f "$TEMP_FILE"
+			echo "Task id '$task_id_to_remove'  to remove not found"
+			exit 1
+		fi
+
+		# Copy tasks in temp file to original file 
+		mv "$TEMP_FILE" "$TASK_FILE"
+
+	         echo "Task id '$task_id_to_remove' removed successfully"	
 
 		;;
 	*)
