@@ -163,7 +163,33 @@ case "$ACTION" in
 			exit 0
 		fi
 
-		echo "The new status '$new_status' and id: '$task_id_to_target' "
+		#Go through each line 
+		while IFS="|" read -r task_id status schedule_type schedule_time command ; do
+		        #check if task id is zero or start with a # character  
+			if [[ -z "$task_id" || "$task_id" =~ ^# ]];then
+				echo "task id not the required format"
+			        	continue
+			fi
+
+			if [[ "$task_id"  ==  "$task_id_to_target" ]];then 
+				echo "Found: '$task_id': '$task_id_to_target'. New status:'$new_status' "
+				# change the status and append to the task file
+				echo "${task_id}|${new_status}|${schedule_type}|${schedule_time}|${command}" >> "$TEMP_FILE"
+				task_found=true
+			else 
+				echo "${task_id}|${status}|${schedule_type}|${schedule_time}|${command}" >> "$TEMP_FILE"
+			fi 
+		done < "$TASK_FILE"
+		#Remove temp file if task_found is false
+		if [[ "$task_found" == false ]];then
+			rm -f "$TEMP_FILE"
+			echo "Task ID '$task_id_to_target' not found"
+			exit 1
+		fi
+               # move temp file to the original task file
+	       mv "$TEMP_FILE" "$TASK_FILE"
+	       echo "Task '$task_id_to_target' $new_status successfully. "
+		
 		;;
 	
 	*)
